@@ -7,12 +7,13 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.core.paginator import Paginator
 from blog.models import Post, Category, Tag
 from .serializers import HomePageSerializer, PostDetailSerializer, TagSerializer, CategorySerializer
 
 
 class CustomPageNumberPagination(PageNumberPagination):
-    page_size = 5  
+    page_size = 5
     page_size_query_param = 'page_size'
     max_page_size = 1000
 
@@ -27,20 +28,28 @@ class HomePageAPIView(generics.ListAPIView):
         return Post.objects.filter(is_published=True, is_top=True).order_by('-id').prefetch_related(
             'tags', 'comments').select_related('category', 'author')
 
-    def list(self, request):
+
+    def list(self, request, *args, **kwargs):
+        page = self.request.query_params.get('page', 1) 
         queryset = self.get_queryset()
-        tags = Tag.objects.all()  
-        categories = Category.objects.all()  
+        tags = Tag.objects.all()
+        categories = Category.objects.all()
 
         serializer = self.get_serializer(queryset, many=True)
-        tags_serializer = TagSerializer(tags, many=True)  
-        categories_serializer = CategorySerializer(categories, many=True)  
+        tags_serializer = TagSerializer(tags, many=True)
+        categories_serializer = CategorySerializer(categories, many=True)
 
         paginated_data = self.paginate_queryset(serializer.data)
+        
+        paginator = Paginator(queryset, self.paginator.page_size)
+        total_pages = paginator.num_pages
+
         response_data = {
             'posts': paginated_data,
             'tags': tags_serializer.data,
-            'categories': categories_serializer.data
+            'categories': categories_serializer.data,
+            'current_page': int(page),           
+            'total_pages': total_pages  
         }
 
         return self.get_paginated_response(response_data)
@@ -85,4 +94,40 @@ class PostDetailAPIView(APIView):
 
         return Response(serialized_data, status=status.HTTP_200_OK)
 
+class FilterListView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = HomePageSerializer
+    pagination_class = CustomPageNumberPagination
 
+    def get_queryset(self):
+        category_id = self.request.query_params.get('category_id', None)
+        tag_id = self.request.query_params.get('tag_id', None)
+
+        if category_id:
+            queryset = Post.objects.filter(is_published=True, category=category_id).select_related('category', 'author').prefetch_related('tags').order_by('-id')
+            return queryset
+        if tag_id:
+            queryset = Post.objects.filter(is_published=True, tags=tag_id).select_related('category', 'author').prefetch_related('tags').order_by('-id')
+            return queryset
+        
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        tags = Tag.objects.all()  
+        categories = Category.objects.all()  
+
+        serializer = self.get_serializer(queryset, many=True)
+        tags_serializer = TagSerializer(tags, many=True)  
+        categories_serializer = CategorySerializer(categories, many=True)  
+
+        paginated_data = self.paginate_queryset(serializer.data)
+        response_data = {
+            'posts': paginated_data,
+            'tags': tags_serializer.data,
+            'categories': categories_serializer.data
+        }
+
+        return self.get_paginated_response(response_data)
+
+# class FilterTopListView(generics.ListAPIView):
