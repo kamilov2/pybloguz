@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  web:
+    image: jasurkamilov/pyblog:tagname
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
+    command: "bash -c 'while :; do sleep 10 && python manage.py runserver 0.0.0.0:8000; done'"
+
+  api_instance_1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
+    depends_on:
+      - web  # Ожидаем, что веб-сервис будет запущен перед этим
+
+  api_instance_2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
+    depends_on:
+      - web  # Ожидаем, что веб-сервис будет запущен перед этим

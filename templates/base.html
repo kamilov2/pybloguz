@@ -1,0 +1,218 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();
+   for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+   k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(95266336, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/95266336" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+<noscript><div><img src="https://mc.yandex.ru/watch/92161304" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WCZCWM5');</script>
+    
+   <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="yandex-verification" content="6f5f50298c460b67" />
+    <meta name="google-site-verification" content="YvmMznWrKMTkzmtTOYx8mb8k-2EmNaywBAimqFDg4Ds" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Abdurakhmon Rashidov">
+    
+    <meta name="description" content="pyblog bu Python va dasturlashga oid o’zbek tilidagi blog. Hozirda Python, Javascript, Dasturlash, Veb dasturlash ,Foundation va boshqa turkumlarga va o’nlab teglarga mansub maqolalar saytdan joy olgan.">
+    <meta name="keywords" content="Dasturlash , Blog, Python , Payton, dasturchi, Javascript, maqola, yangilik, dastur,">
+    {% if post %}
+    
+    
+    
+    
+    <meta property="og:site_name" content="pyblog.uz - Abdurahmon Rashidov"/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="{{post.title}}"/>
+    <meta property="og:description" content="{{post.plain}}"/>
+    <meta property="og:image" content="{{post.image_url}}"/>
+    <meta property="og:url" content="https://pyblog.uz/post/{{post.slug}}"/>
+    {% else %}
+    <meta property="og:title" content="Python va dasturlash haqida o'zbek tilidagi blog.">
+    <meta property="og:site_name" content="pyblog.uz">
+    <meta property="og:url" content="https://pyblog.uz">
+    <meta property="og:description" content="pyblog.uz bu python va dasturlashga oid o'zbek tilidagi sifatli maqola , tutoriallar berib boruvchi blog hisoblanadi.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{% static 'assets/images/HEAD.svg' %}">
+    {% endif %}
+
+    <!-- Links -->
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/responsive.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="{% static 'assets/images/HEAD.svg' %}" type="image/x-icon">
+{% block title %}
+    <title>pyblog.uz - Abdurahmon Rashidov</title>
+{% endblock %}
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-B72B625YDN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-B72B625YDN');
+</script>
+
+
+
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <div class="section-wrapp">
+                <div class="header-wrapper">
+                    <a href="/">
+                        <img class="header-logo_img" src="{% static 'assets/images/HEAD.svg' %}" alt="">
+                        <span class="btn-shine">BETA</span>
+                    </a>
+
+                    <div class="header-details_wrapper">
+                        <form action="" class="header-search_form">
+                            <div class="header-search_wrapper">
+                                <div class="header-search_inner">
+                                    <input type="text" id="s_query" onkeyup="fetchQueryData(this.value)" class="s_query" name="s_query"
+                                        placeholder="shu yerga yozasiz..." autocomplete="off">
+                                    <button type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+
+                                    <!-- Search resultlar -->
+                                    <div class="header-res_wrapper cleared noned">
+                                        <p class="header-res_heading">
+                                            Yangi postlar
+                                        </p>
+
+                                        <p class="header-close">
+                                            <i class="fas fa-close"></i>
+                                        </p>
+                                        {% if not page_obj %}
+                                        {% for post in related_posts|slice:'3' %}
+                                        <div class="header-res_item" id="default_posts">
+                                            <a href="{% url 'blog:post_detail' post.slug %}" class="header-res_item_link">
+                                                <img class="header-res_item_img" src="{{post.image_url}}"
+                                                    alt="{{post.title}}">
+                                                    {{post.title}}
+                                            </a>
+                                        </div>
+                                        {% endfor %}
+                                        {% else %}
+                                        {% for post in page_obj|slice:'3' %}
+                                        <div class="header-res_item" id="default_posts">
+                                            <a href="{% url 'blog:post_detail' post.slug %}" class="header-res_item_link">
+                                                <img class="header-res_item_img" src="{{post.image_url}}"
+                                                    alt="{{post.title}}">
+                                                    {{post.title}}
+                                            </a>
+                                        </div>
+                                        {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="header-search_bg"></div>
+                            </div>
+                            <div class="header-search_opener">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+{% block content %}
+{% endblock %}
+<footer>
+    <div class="section-wrapp">
+        <div class="container">
+            <ul class="footer-list">
+                <li class="footer-item">
+                    <a href="/">
+                        <img src="{% static 'assets/images/HEAD.svg' %}" alt="Logo">
+                        <span class="btn-shine">BETA</span>
+                    </a>
+                    <p class="footer-text_info">
+                        Python hamda dasturlashga oid o’zbek <br>
+                        tilidagi blog. 
+                    </p>
+                 
+                </li>
+
+                <li class="footer-item">
+                    <ul class="footer-links_list">
+                        <li class="footer-link_item link"><a href="/">Bosh sahifa</a></li>
+                        <li class="footer-link_item link"><a href="{% url 'blog:contact' %}">Bog’lanish</a></li>
+                        <li class="footer-link_item link">
+                            <button href="#" class="header-user_switcher">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="footer-item">
+                    <ul class="footer-links_list">
+                        <li class="footer-link_item telegram social_link">
+                            <a href="https://t.me/pybloguz">
+                                <i class="fab fa-telegram"></i>
+                                Telegram
+                            </a>
+                        </li>
+                        <li class="footer-link_item instagram social_link">
+                            <a href="https://www.instagram.com/pyblog.uz/">
+                                <i class="fab fa-instagram"></i>
+                                Instagram
+                            </a>
+                        </li>
+                        <li class="footer-link_item facebook social_link">
+                            <a href="https://www.facebook.com/pybloguz">
+                                <i class="fab fa-facebook"></i>
+                                Facebook
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <p class="footer-information_text">
+
+                pyblog.uz by <a href="https://www.instagram.com/rashidov_21/">Abdurakhmon Rashidov</a> created with <i class="fas fa-heart"></i> akalar.
+            </p>
+        </div>
+    </div>
+</footer>
+<script src="{% static 'assets/js/search.js' %}"></script>
+<script src="{% static 'assets/js/main.js' %}"></script>
+{% if request.path == "/" or "filter" in request.path %}
+<script src="{% static 'assets/js/home.js' %}"></script>
+{% endif %}
+<script src="{% static 'assets/lib/js/smooth-scroll.js' %}"></script>
+</body>
+
+</html>

@@ -1,0 +1,281 @@
+{% extends 'base.html' %} {% load static %} 
+
+{% block title %}
+    <title>{{post.title}}</title>
+{% endblock %}
+
+{% block content %}
+
+
+
+
+<link  rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai-sublime.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<script>
+  hljs.highlightAll();
+
+  document.addEventListener("DOMContentLoaded", (event) => {
+    document.querySelectorAll("pre").forEach((el) => {
+      el.classList.add("language-python")
+        hljs.highlightElement(el);
+    });
+  });
+  
+
+
+</script>
+
+<style>
+  main * {
+    list-style: auto !important;
+  }
+  ul,
+  ol {
+    margin-left: 40px;
+  }
+  .ql-syntax {
+    padding: 10px;
+    border-radius: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow-x:scroll;
+  }
+  .post_detail-content p img{
+    max-width: 100%;
+  }
+</style>
+<main>
+  <div class="message active">
+    <p class="message_info">Saqlab olindi !</p>
+    <i class="fas fa-xmark" onclick="clearMessage(this)"></i>
+  </div>
+  <div class="post_detail">
+    <div class="section-wrapp">
+      <div class="container">
+        <div class="post_wrapper shadowed">
+          <div class="post_heading">
+            <a href="#">
+              <i class="{{post.icon}}"></i>
+            </a>
+            <h1>{{post.title}}</h1>
+          </div>
+
+          <div class="post_info-wrapper">
+            <a href="#">
+              <i class="fas fa-user" style="color: #6ea7e0;"></i>
+              {{post.author.get_full_name}}
+            </a>
+
+            <a href="{% url 'blog:category_list' post.category.slug %}">
+              <i class="{{post.category.icon}}"></i>
+              {{post.category}}
+            </a>
+
+            <span>
+              <i class="fas fa-eye" style="color: #6ea7e0;"></i>
+              {{post.views}}
+            </span>
+
+            <span>
+              <i class="fas fa-fire-flame-curved" style="color: orange;"></i>
+              {{post.get_all_reaction_count}}
+            </span>
+          </div>
+
+          <div class="post_detail-content">
+            <p>{% autoescape off %} {{post.body.html}} {% endautoescape %}</p>
+          </div>
+
+          <div class="post_detail-bottom_info">
+            <div class="post_detail-bottom_reaction">
+              <span class="post_detail-bottom_reaction_item">
+                <p class="post_detail-bottom_reaction_title">+{{post.good}}</p>
+                <img
+                  onclick="postReact({{post.id}}, 'good')"
+                  src="{% static './assets/emojies/thumbs_up.png' %}"
+                  width="32"
+                  height="32"
+                  alt="👍"
+                />
+              </span>
+
+              <span class="post_detail-bottom_reaction_item">
+                <p class="post_detail-bottom_reaction_title">+{{post.like}}</p>
+                <img
+                  onclick="postReact({{post.id}}, 'like')"
+                  src="{% static './assets/emojies/heart.png' %}"
+                  width="32"
+                  height="32"
+                  alt="❤"
+                />
+              </span>
+
+              <span class="post_detail-bottom_reaction_item">
+                <p class="post_detail-bottom_reaction_title">+{{post.great}}</p>
+                <img
+                  onclick="postReact({{post.id}}, 'great')"
+                  src="{% static './assets/emojies/sunglass_face.png' %}"
+                  width="32"
+                  height="32"
+                  alt="😎"
+                />
+              </span>
+
+              <span class="post_detail-bottom_reaction_item">
+                <p class="post_detail-bottom_reaction_title">+{{post.fire}}</p>
+                <img
+                  onclick="postReact({{post.id}}, 'fire')"
+                  src="{% static './assets/emojies/fire.png' %}"
+                  width="32"
+                  height="32"
+                  alt="💥"
+                />
+              </span>
+
+              <span class="post_detail-bottom_reaction_item">
+                <p class="post_detail-bottom_reaction_title">
+                  +{{post.legend}}
+                </p>
+                <img
+                  onclick="postReact({{post.id}}, 'legend')"
+                  src="{% static './assets/emojies/alien.png' %}"
+                  width="32"
+                  height="32"
+                  alt="👽"
+                />
+              </span>
+
+              <span class="post_detail-bottom_reaction_item">
+                <p class="post_detail-bottom_reaction_title">
+                  +{{post.neutral}}
+                </p>
+                <img
+                  onclick="postReact({{post.id}}, 'neutral')"
+                  src="{% static './assets/emojies/neutral_face.png' %}"
+                  width="32"
+                  height="32"
+                  alt="😐"
+                />
+              </span>
+
+              <span class="post_detail-bottom_reaction_item">
+                <p class="post_detail-bottom_reaction_title">
+                  +{{post.dislike}}
+                </p>
+                <img
+                  onclick="postReact({{post.id}}, 'dislike')"
+                  src="{% static './assets/emojies/thumbs_down.png' %}"
+                  width="32"
+                  height="32"
+                  alt="👎"
+                />
+              </span>
+            </div>
+
+            <div class="post_detail-bottom_tags">
+              <h3 class="post_detail-bottom_title">Maqola teglari</h3>
+
+              <div class="post_detail-tag_wrapper">
+                {% for tag in post.tags.all %}
+                <a
+                  href="{% url 'blog:tag_list' tag.slug %}"
+                  class="post_detail-tag_item"
+                >
+                  <i class="{{tag.icon}}"></i>
+                  {{tag.title}}
+                </a>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="post_detail-down">
+            <div class="post_detail-down_author">
+              <a href="#">
+                <i class="fas fa-user" style="color: #6ea7e0;"></i>
+                {{post.author.get_full_name}}
+              </a>
+
+              <a href="{% url 'blog:category_list' post.category.slug %}">
+                <i class="{{post.category.icon}}"></i>
+                {{post.category}}
+              </a>
+
+              <span>
+                <i class="fas fa-eye" style="color: #6ea7e0;"></i>
+                {{post.views}}
+              </span>
+            </div>
+
+            <div class="post_detail-down_socials">
+              <a href="https://www.facebook.com/sharer/sharer.php?u=https://pyblog.uz/post/{{post.slug}}" target="_blank">
+                <i class="fab fa-facebook"></i>
+                Facebook
+              </a>
+
+              <a href="https://t.me/share/url?url=https://pyblog.uz/post/{{post.slug}}&text={{post.title}}" target="_blank">
+                <i class="fab fa-telegram"></i>
+                Telegram
+              </a>
+            </div>
+          </div>
+        </div>
+        <br />
+        <div class="post_related_blocks">
+          <div class="post_related shadowed">
+            <h1 class="post_additional-heading">Bu haftada ko'p o'qildi</h1>
+            {% for post in most_read %}
+            <div class="post_related-item">
+              <a href="{% url 'blog:post_detail' post.slug %}" style="display:flex; gap:10px;">
+                  <img src="{{post.image_url}}" alt="{{post.title}}" />
+                <div>
+                  <h1>
+                    {{post.title}}
+                   
+                  </h1> 
+                  <span>
+                    <i class="fas fa-eye" style="color: #6ea7e0;"></i>
+                    {{post.views}}
+                  </span>  
+                  <span>
+                    <i class="fas fa-fire-flame-curved" style="color: orange;"></i>
+                    {{post.get_all_reaction_count}}
+                  </span>
+                </div>            
+              </a>
+            </div>
+            {% empty %}
+            <h1>Hozircha maqolalar mavjud emas !</h1>
+            {% endfor %}
+          </div>
+          <div class="post_related shadowed">
+            <h1 class="post_additional-heading">Mavzuga oid</h1>
+            {% for post in related_posts %}
+            <div class="post_related-item">
+              <a href="{% url 'blog:post_detail' post.slug %}">
+                  <img src="{{post.image_url}}" alt="{{post.title}}" />
+                  <div>
+                    <h1>
+                      {{post.title}}                     
+                    </h1> 
+                    <span>
+                      <i class="fas fa-eye" style="color: #6ea7e0;"></i>
+                      {{post.views}}
+                    </span>  
+                    <span>
+                      <i class="fas fa-fire-flame-curved" style="color: orange;"></i>
+                      {{post.get_all_reaction_count}}
+                    </span>
+                  </div>              
+              </a>
+            </div>
+            {% empty %}
+            <h1>Hozircha maqolalar mavjud emas !</h1>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% endblock %}

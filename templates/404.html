@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    <title>404 - sahifa topilmadi.</title>
+{% endblock %}
+{% block content %}
+
+
+
+    <main>
+        <div class="contact">
+            <div class="section-wrapp">
+                <div class="container">
+                    <div class="contact-info_wrapper">
+                        <div class="contact-info shadowed" style="display:flex; flex-direction:column; align-items:center;">
+                            <h1 class="contact-heading">'40' + '4' = '404'!</h1>
+                            <br>
+                            <h3 class="contact-subheading">Sahifa topilmadi , lekin rosti rosa qidirdik...</h3>
+
+                            <img src="{% static 'assets/images/404.svg' %}" style="width:100px;"/>
+                            
+                            <a href="/" class="contact-subheading">Bosh sahifa</a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+<br>
+<br>
+{% endblock %}

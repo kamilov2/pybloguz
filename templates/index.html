@@ -1,0 +1,506 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    <title>pyblog.uz - Python hamda dasturlashga oid o'zbek tilidagi blog.</title>
+{% endblock %}
+
+
+{% block content %}
+    <main>
+        <div class="hero">
+            <div class="container">
+                <div class="section-wrapp">
+                    <div class="hero-divider">
+                        <div class="hero-sidebar">
+                            <!-- Instagram  -->
+                            <div class="hero-sidebar_block">
+                                <h1 class="hero-sidebar_heading">
+                                    Kun hazili
+                                </h1>
+
+                                <a href="{{instagram_post.link}}" alt="{{instagram_post.image.url}}">
+                                    <img class="hero-sidebar_img" src="{{instagram_post.image.url}}" alt="Instagram post">
+                                </a>
+
+                                <div class="hero-sidebar_jk_details">
+                                    <div class="hero-sidebar_jk_item">
+                                        <i class="fas fa-heart"></i>
+                                        +{{instagram_post.likes}}
+                                    </div>
+                                    <div class="hero-sidebar_jk_item">
+                                        <i class="fas fa-paper-plane"></i>
+                                        +{{instagram_post.shares}}
+                                    </div>
+                                    <div class="hero-sidebar_jk_item">
+                                        <i class="fas fa-message"></i>
+                                        +{{instagram_post.comments}}
+                                    </div>
+                                </div>
+
+                                <p class="hero-sidebar_link_info">
+                                    Yanada ko’proq memlar bizning <br>
+                                    <a href="https://www.instagram.com/pyblog.uz/" alt="{{instagram_post.image.url}}">
+                                        <i class="fab fab fa-instagram"></i>
+                                        Instagram
+                                    </a>
+
+                                    sahifamizda.
+                                </p>
+                            </div>  
+                            <!-- Categories  -->
+                            <div class="hero-sidebar_block">
+                                <div class="hero-sidebar_heading_wrapp">
+                                    <h1 class="hero-sidebar_heading">
+                                        Ruknlar
+                                    </h1>
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+
+                                <div class="hero-sidebar_list">
+                                    {% for cat in categories %}
+                                    <div class="hero-sidebar_item">
+                                        <a href="{% url 'blog:category_list' cat.slug %}" title="{{cat.title}}' rukniga oid maqolalar">
+                                            <i class="{{cat.icon}}"></i>
+                                            {{cat.title}}
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <!-- Tags  -->
+                            <div class="hero-sidebar_block">
+                                <div class="hero-sidebar_heading_wrapp">
+                                    <h1 class="hero-sidebar_heading">
+                                        Foydali teglar
+                                    </h1>
+                                    <i class="fas fa-tags"></i>
+                                </div>
+
+                                <div class="hero-sidebar_list">
+                                    {% for tag in tags %}
+                                    <div class="hero-sidebar_item">
+                                        <a href="{% url 'blog:tag_list' tag.slug %}" title='{{tag.title}} tegiga oid maqolalar.'>
+                                            <i class="{{tag.icon}}"></i>
+                                            {{tag.title}}
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <!-- Ad  -->
+                            <div class="hero-sidebar_block ad">
+                                <img class="hero-sidebar_img" src="{% static './assets/images/code.png' %}" alt="Reklama rasmi"  style="width:292px; height:292px;">
+                                <div class="hero-sidebar_ad_info_wrapper">
+                                    <h1 class="hero-sidebar_ad_heading">
+                                        Telegram kanalimizga qo'shiling!
+                                    </h1>
+                                    <p class="hero-sidebar_ad_info">
+                                        
+                                    </p>
+                                    <a class="hero-sidebar_ad_link" title="Pyblog.uz o'zbek tilidagi dasturlash blogi" target="_blank" href="https://t.me/pybloguz">
+                                        <i class="fab fa-telegram"></i>
+                                        Kanalga o'tish
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- For something  
+                            <div class="hero-sidebar_block">
+                                <div class="hero-sidebar_ad_info_wrapper" style="padding: 0px;">
+                                    <img src="{{ad_object.image.url}}" alt=""  style="width:292px; height:292px;">
+                                    <h1 class="hero-sidebar_ad_heading">
+                                        {{ad_object.title}}
+                                    </h1>
+                                    <p class="hero-sidebar_ad_info">
+                                        {{ad_object.description}}
+                                    </p>
+                                    <a class="hero-sidebar_ad_link" title="{{ad_object.title}}" target="_blank" href="{{ad_object.link}}">Batafsil</a>
+                                </div> 
+                            </div> -->
+                        </div>
+
+                        <div class="hero-content">
+                            <div class="hero-top_sort_list">
+                                <div class="hero-top_sort_item" id="filter_buttons">
+                                    <a href="{% url 'blog:filter_by_something' 'new' %}" title="Yangi qo'shilgan maqolalar">
+                                        <i class="fas fa-clock" style="color: #6ea7e0;"></i>
+                                        Yangilar
+                                    </a>
+                                </div>
+                                <div class="hero-top_sort_item" id="filter_buttons">
+                                    <a href="{% url 'blog:filter_by_something' 'fire' %}" title="Reaksiyalarga boy maqolalar !">
+                                        <i class="fas fa-fire-flame-curved" style="color: orange;"></i>
+                                        Yonmoqda
+                                    </a>
+                                </div>
+                                <div class="hero-top_sort_item " id="filter_buttons">
+                                    <a  href="{% url 'blog:filter_by_something' 'reactions' %}" title="Ko'p reaksiyalarga sabab bo'lgan maqolalar">
+                                        <i class="fas fa-lightbulb" id="emoji" style="color: orange;" ></i>
+                                        Emoji
+                                    </a>
+                                </div>                         
+                                <div class="hero-top_sort_item" id="filter_buttons">
+                                    <a href="{% url 'blog:filter_by_something' 'top' %}" title="Eng mashhur maqolalar">
+                                        <i class="fas fa-trophy" style="color: orange;"></i>
+                                        TOP
+                                    </a>
+                                </div>
+
+                                <div class="hero-top_sort_item menu">
+                                    <a href="#">
+                                        <i class="fas fa-bars" style="color: #6ea7e0;"></i>
+                                        Menyu
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="hero-top_tag_list">
+                                {% for category in categories|slice:':5' %}
+                                <div class="hero-top_tag_item">
+                                    <a href="{% url 'blog:category_list' category.slug %}" title="{{category.title}} rukniga oid maqolalar.">
+                                        <i class="{{category.icon}}"></i>
+                                        {{category.title}}
+                                    </a>
+                                </div>
+                                {% endfor %}
+
+                                <div class="hero-top_tag_item icon">
+                                    <a href="#">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="hero-top_tag_more">
+                                {% for category in categories|slice:'5:' %}
+                                <div class="hero-top_tag_item link">
+                                    <a href="{% url 'blog:category_list' category.slug %}" title="{{category.title}} rukniga oid maqolalar.">
+                                        <i class="{{category.icon}}"></i>
+                                        {{category.title}}
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="hero-top_closer bg"></div>
+
+                            <div class="hero-top_menu">
+                                <div class="hero-top_menu_block">
+                                    <div class="hero-top_menu_heading_wrapper">
+                                        <h1 class="hero-top_menu_title" title="Maqolalarni saralash">
+                                            Saralash
+                                        </h1>
+
+                                        <span class="hero-top_closer">
+                                            <i class="fas fa-xmark"></i>
+                                        </span>
+                                    </div>
+
+                                    <div class="hero-top_menu_list">
+                                        <a href="{% url 'blog:filter_by_something' 'new' %}" class="hero-top_menu_item" title="Yangi qo'shilgan maqolalar.">
+                                            <i class="fas fa-clock" style="color: #6ea7e0;"></i>
+                                            Yangilar
+                                        </a>                                        
+                                        <a href="{% url 'blog:filter_by_something' 'reactions' %}" class="hero-top_menu_item" title="Ko'p reaksiyalarga sabab bo'lgan maqolalar.">
+                                            <i class="fas fa-smile" style="color: orange;"></i>
+                                            Emoji
+                                        </a>                                  
+                                        <a href="{% url 'blog:filter_by_something' 'fire' %}" class="hero-top_menu_item"
+                                        title="Muhokama bop maqolalar.">
+                                            <i class="fas fa-fire-flame-curved" style="color: orange;"></i>
+                                            Yonmoqda
+                                        </a>
+                                        <a href="{% url 'blog:filter_by_something' 'top' %}" class="hero-top_menu_item"
+                                        title="Eng mashhur maqolalar.">
+                                            <i class="fas fa-trophy" style="color: orange;"></i>
+                                            Top
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="hero-top_menu_block">
+                                    <div class="hero-top_menu_heading_wrapper">
+                                        <h1 class="hero-top_menu_title" title="Vaqt bo'yicha saralash">
+                                            Vaqt bo'yicha
+                                        </h1>
+
+                                        <span>
+                                            <i class="fas fa-clock"></i>
+                                        </span>
+                                    </div>
+
+                                    <div class="hero-top_menu_list">
+                                        <a href="{% url 'blog:filter_by_something' 'week' %}" class="hero-top_menu_item"
+                                        title="Ushbu haftada qo'shilgan maqolalar.">
+                                            <i class="fas fa-calendar-week" style="color: #6ea7e0;"></i>
+                                            Bu haftada
+                                        </a>
+
+                                        <a href="{% url 'blog:filter_by_something' 'month' %}" class="hero-top_menu_item"
+                                        title="Ushbu oyda qo'shilgan maqolalar.">
+                                            <i class="fas fa-calendar-days" style="color: #6ea7e0;"></i>
+                                            Bu oyda
+                                        </a>
+
+                                        <a href="{% url 'blog:filter_by_something' 'everytime' %}" class="hero-top_menu_item"
+                                        title="Oldin qo'shilgan barcha maqolalar.">
+                                            <i class="fas fa-calendar" style="color: #6ea7e0;"></i>
+                                            Har doim
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="hero-top_menu_block">
+                                    <div class="hero-top_menu_heading_wrapper">
+                                        <h1 class="hero-top_menu_title" title="Ruknlar bo'yicha saralash">
+                                            Ruknlar
+                                        </h1>
+
+                                        <span>
+                                            <i class="fas fa-layer-group"></i>
+                                        </span>
+                                    </div>
+
+                                    <div class="hero-top_menu_list">
+                                        {% for category in categories %}
+                                        <a href="{% url 'blog:category_list' category.slug %}" class="hero-top_menu_item">
+                                            <i class="{{category.icon}}"></i>
+                                            {{category.title}}
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+
+                                <div class="hero-top_menu_block">
+                                    <div class="hero-top_menu_heading_wrapper">
+                                        <h1 class="hero-top_menu_title" title="Teglar bo'yicha saralash">
+                                            Foydali Teglar
+                                        </h1>
+
+                                        <span>
+                                            <i class="fas fa-tags"></i>
+                                        </span>
+                                    </div>
+
+                                    <div class="hero-top_menu_list">
+                                        {% for tag in tags %}
+                                        <a href="{% url 'blog:tag_list' tag.slug %}" class="hero-top_menu_item">
+                                            <i class="{{tag.icon}}"></i>
+                                            {{tag.title}}
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="hero-content_list">
+
+                                {% for post in page_obj %}
+                                <div class="hero-content_item">
+                                    <div class="hero-content_item_wrapper">
+                                        <div class="hero-content_info_wrapper">
+                                            <div class="hero-content_top_info">
+                                                <a href="{% url 'blog:category_list' post.category.slug %}" class="hero-content_tag" title="{{post.category}} rukniga oid maqolalar.">
+                                                    <i class="{{post.category.icon}}"></i>
+                                                    {{post.category}}
+                                                </a>
+
+                                                <span class="hero-content_date">{{post.published|date:'d-B Y'}}</span>
+
+                                                <span class="hero-content_view">
+                                                    <i class="fas fa-eye"></i>
+                                                    {{post.views}} marta
+                                                </span>
+                                            </div>
+
+                                            <h1 class="hero-content_heading" title='{{post.title}}'>
+                                                <a href="{% url 'blog:post_detail' post.slug %}">
+                                                    {{post.title}}
+                                                </a>
+                                            </h1>
+
+                                            <p class="hero-content_text">{{post.plain|safe}}...</p>
+                                        </div>
+
+                                        <a href="{% url 'blog:post_detail' post.slug%}">
+                                            <img class="hero-content_poster_img"
+                                                src="{{post.image.url}}" alt="{{post.title}}">
+                                        </a>
+                                    </div>
+
+                                    <div class="hero-content_bottom_info">
+                                        <div class="hero-content_bottom_details">
+                                            <span href="#" class="hero-content_bottom_detail" disabled>
+                                                <i class="fa-regular fa-face-laugh-wink"></i>
+                                                <span>{{post.get_all_reaction_count}}</span>
+
+                                                <div class="hero-content_bottom_detail_tooltip">
+                                                    Reaksiyalar bildirganlar !
+                                                </div>
+                                            </span>
+
+                                        </div>
+                                        <div class="hero-content_bottom_emoji_list" id="desktop_emoji">
+                                           
+                                            <span class="hero-content_bottom_emoji_item" title='Yaxshi'>
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.good}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'good')" src="{% static './assets/emojies/thumbs_up.png' %}" width="32" height="32" alt="👍">
+                                            </span>
+                                            
+                                            <span class="hero-content_bottom_emoji_item" title="Yoqdi">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.like}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'like')" src="{% static './assets/emojies/heart.png' %}" width="32" height="32" alt="❤">
+                                            </span>
+                                            
+                                            <span class="hero-content_bottom_emoji_item" title="Zo'r">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.great}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'great')" src="{% static './assets/emojies/sunglass_face.png' %}" width="32" height="32" alt="😎">
+                                            </span>
+                                           
+                                            <span class="hero-content_bottom_emoji_item" title="Yonmoqda">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.fire}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'fire')" src="{% static './assets/emojies/fire.png' %}" width="32" height="32" alt="💥">
+                                            </span>
+                                            
+                                            <span class="hero-content_bottom_emoji_item" title="Afsonaviy">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.legend}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'legend')" src="{% static './assets/emojies/alien.png' %}" width="32" height="32" alt="👽">
+                                            </span>
+                                            
+                                            <span class="hero-content_bottom_emoji_item" title="Betaraf">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.neutral}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'neutral')" src="{% static './assets/emojies/neutral_face.png' %}" width="32" height="32" alt="😐">
+                                            </span>
+                                            
+                                            <span class="hero-content_bottom_emoji_item" title="Yoqmadi">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.dislike}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'dislike')" src="{% static './assets/emojies/thumbs_down.png' %}" width="32" height="32" alt="👎">
+                                            </span>
+                                            
+                                        </div>
+                                        <div class="hero-content_bottom_emoji_list" id="mobile_emoji">
+                                            {% if post.get_most_reaction.emoji == 'good' %}
+                                            <span class="hero-content_bottom_emoji_item" style="display: block;">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.good}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'good')" src="{% static './assets/emojies/thumbs_up.png' %}" width="32" height="32" alt="👍">
+                                            </span>
+                                            {% elif post.get_most_reaction.emoji == 'like' %}
+                                            <span class="hero-content_bottom_emoji_item" style="display: block;">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.like}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'like')" src="{% static './assets/emojies/heart.png' %}" width="32" height="32" alt="❤">
+                                            </span>
+                                            {% elif post.get_most_reaction.emoji == 'great' %}
+                                            <span class="hero-content_bottom_emoji_item" style="display: block;">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.great}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'great')" src="{% static './assets/emojies/sunglass_face.png' %}" width="32" height="32" alt="😎">
+                                            </span>
+                                            {% elif post.get_most_reaction.emoji == 'fire' %}
+                                            <span class="hero-content_bottom_emoji_item" style="display: block;">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.fire}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'fire')" src="{% static './assets/emojies/fire.png' %}" width="32" height="32" alt="💥">
+                                            </span>
+                                            {% elif post.get_most_reaction.emoji == 'legend' %}
+                                            <span class="hero-content_bottom_emoji_item" style="display: block;">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.legend}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'legend')" src="{% static './assets/emojies/alien.png' %}" width="32" height="32" alt="👽">
+                                            </span>
+                                            {% elif post.get_most_reaction.emoji == 'neutral' %}
+                                            <span class="hero-content_bottom_emoji_item" style="display: block;">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.neutral}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'neutral')" src="{% static './assets/emojies/neutral_face.png' %}" width="32" height="32" alt="😐">
+                                            </span>
+                                            {% elif post.get_most_reaction.emoji == 'dislike' %}
+                                            <span class="hero-content_bottom_emoji_item" style="display: block;">
+                                                <p class="hero-content_bottom_emoji_title">
+                                                    +{{post.dislike}}
+                                                </p>
+                                                <img onclick="postReact({{post.id}}, 'dislike')" src="{% static './assets/emojies/thumbs_down.png' %}" width="32" height="32" alt="👎">
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="hero-content_item" style="display:flex; align-items:center; flex-direction:column; gap:15px;">
+                                    <h4 class="hero-sidebar_heading">Hozircha maqolalar mavjud emas !</h4>
+                                    <img width="100" src="{% static 'assets/images/404.svg' %}">
+                                </div>
+                                {% endfor %}
+                              
+                                {% if page_obj %}
+                                <div class="hero-content_pagination_list">
+                                    {% if page_obj.has_previous %}
+                                    <!-- Agar page oldingi bolmasa "disabled" classni qoshing -->
+                                    <a href="?page={{page_obj.previous_page_number}}" class="hero-content_pagination_item">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                    {% else %}
+                                    <a href="#" class="hero-content_pagination_item disabled">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                    {% endif %}
+
+                                    <div class="hero-content_pagination_numbers">
+                                        {% for page in page_obj.paginator.page_range|slice:':3' %}
+                                        <a href="?page={{page}}" class="{% if page == page_obj.number %}selected{% endif %}  hero-content_pagination_item">
+                                            {{page}}
+                                        </a>
+                                        {% endfor %}
+
+                                        <a href="#" class="hero-content_pagination_item">
+                                            ...
+                                        </a>
+                                        {% for page in page_obj.paginator.page_range|slice:'-2:' %}
+                                        <a href="?page={{page}}" class="{% if page == page_obj.number %}selected{% endif %}  hero-content_pagination_item">
+                                            {{page}}
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                    {% if page_obj.has_next  %}
+                                    <a href="?page={{page_obj.next_page_number}}" class="hero-content_pagination_item">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="message active">
+                        <p class="message_info">Saqlab olindi !</p>
+                        <i class="fas fa-xmark" onclick="clearMessage(this)"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
