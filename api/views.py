@@ -7,6 +7,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.db.models import Max
 from django.core.paginator import Paginator
 from blog.models import Post, Category, Tag
 from .serializers import HomePageSerializer, PostDetailSerializer, TagSerializer, CategorySerializer
@@ -36,8 +37,8 @@ class HomePageAPIView(generics.ListAPIView):
         categories = Category.objects.all()
 
         serializer = self.get_serializer(queryset, many=True)
-        tags_serializer = TagSerializer(tags, many=True)
-        categories_serializer = CategorySerializer(categories, many=True)
+        
+        
 
         paginated_data = self.paginate_queryset(serializer.data)
         
@@ -45,14 +46,14 @@ class HomePageAPIView(generics.ListAPIView):
         total_pages = paginator.num_pages
 
         response_data = {
+            'tags': TagSerializer(tags, many=True),
+            'categories': CategorySerializer(categories, many=True),
             'posts': paginated_data,
-            'tags': tags_serializer.data,
-            'categories': categories_serializer.data,
             'current_page': int(page),           
             'total_pages': total_pages  
         }
 
-        return self.get_paginated_response(response_data)
+        return self.get_paginated_response(response_data, status=status.HTTP_200_OK)
 
 class PostDetailAPIView(APIView):
     permission_classes = [AllowAny]
@@ -88,11 +89,14 @@ class PostDetailAPIView(APIView):
 
         related_serializer = PostDetailSerializer(related_post_ids, many=True, context={'request': request})
 
-        serialized_data = serializer.data
-        serialized_data['related_posts'] = related_serializer.data
-        serialized_data['top_posts'] = top_posts_serializer.data
+        response_data = {
+            'post': serializer.data,
+            'related_posts': related_serializer.data,
+            'top_posts': top_posts_serializer.data
+        }
 
-        return Response(serialized_data, status=status.HTTP_200_OK)
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 class FilterListView(generics.ListAPIView):
     permission_classes = [AllowAny]
@@ -101,33 +105,122 @@ class FilterListView(generics.ListAPIView):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        category_id = self.request.query_params.get('category_id', None)
-        tag_id = self.request.query_params.get('tag_id', None)
+        category_id, tag_id = (
+            self.request.query_params.get('category_id', None),
+            self.request.query_params.get('tag_id', None)
+        )
 
-        if category_id:
-            queryset = Post.objects.filter(is_published=True, category=category_id).select_related('category', 'author').prefetch_related('tags').order_by('-id')
-            return queryset
-        if tag_id:
-            queryset = Post.objects.filter(is_published=True, tags=tag_id).select_related('category', 'author').prefetch_related('tags').order_by('-id')
-            return queryset
-        
+        try:
+            if category_id:
+                queryset = Post.objects.filter(is_published=True, category=category_id).select_related('category', 'author').prefetch_related('tags').order_by('-id')
+                category = Category.objects.filter(id=category_id).first()
+                return queryset, category.title if category else None, queryset.count()
+            elif tag_id:
+                queryset = Post.objects.filter(is_published=True, tags=tag_id).select_related('category', 'author').prefetch_related('tags').order_by('-id')
+                tag = Tag.objects.filter(id=tag_id).first()
+                return queryset, tag.title if tag else None, queryset.count()
+        except Exception as e:
+            print(f"Error in get_queryset: {e}")
+
+        return Post.objects.none(), None, 0
 
     def list(self, request):
-        queryset = self.get_queryset()
-        tags = Tag.objects.all()  
-        categories = Category.objects.all()  
+        try:
+            queryset, title, post_count = self.get_queryset()
+            tags = Tag.objects.all()
+            categories = Category.objects.all()
 
-        serializer = self.get_serializer(queryset, many=True)
-        tags_serializer = TagSerializer(tags, many=True)  
-        categories_serializer = CategorySerializer(categories, many=True)  
+            if queryset is not None and len(queryset) > 0:
+                serializer = self.get_serializer(queryset, many=True)
 
-        paginated_data = self.paginate_queryset(serializer.data)
-        response_data = {
-            'posts': paginated_data,
-            'tags': tags_serializer.data,
-            'categories': categories_serializer.data
+                paginated_data = self.paginator.paginate_queryset(serializer.data, self.request)
+                response_data = {
+                    'tags': TagSerializer(tags, many=True).data,
+                    'categories': CategorySerializer(categories, many=True).data,
+                    'posts': paginated_data,
+                    'title': title,
+                    'post_count': post_count,
+                    'page_count': self.paginator.page.paginator.num_pages,
+                    'current_page': self.paginator.page.number,
+                    'next_page': self.paginator.get_next_link(),
+                    'previous_page': self.paginator.get_previous_link()
+                }
+
+                return Response(response_data, status=status.HTTP_200_OK)
+            else:
+                response_data = {
+                    'message': 'Hozircha maqolalar mavjud emas!',
+                    'title': title,
+                    'post_count': post_count,
+                    'page_count': 0,
+                    'current_page': 1
+                }
+                return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error in list: {e}")
+            return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
+
+class FilterTopListView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = HomePageSerializer
+    pagination_class = CustomPageNumberPagination
+
+    def get_queryset(self):
+        this_week = datetime.datetime.utcnow().isocalendar()[1]
+        this_month = datetime.datetime.utcnow().month
+
+        top_filters = {
+            'reactions': Post.objects.filter(is_published=True).order_by("-reaction_count").prefetch_related(
+                'tags', 'comments').select_related('category', 'author'),
+            'new': Post.objects.filter(is_published=True).order_by('-id').prefetch_related('tags').select_related(
+                'category'),
+            'fire': Post.objects.annotate(Max('reaction_count')).filter(is_published=True).prefetch_related('tags').select_related(
+                'category'),
+            'top': Post.objects.filter(is_published=True, is_top=True).order_by('-id').prefetch_related('tags').select_related(
+                'category'),
+            'week': Post.objects.filter(is_published=True, published_date__week=this_week).order_by('-id').prefetch_related(
+                'tags').select_related('category'),
+            'month': Post.objects.filter(is_published=True, published_date__month=this_month).order_by('-id').prefetch_related(
+                'tags').select_related('category'),
+            'everytime': Post.objects.filter(is_published=True, is_top=True).order_by('-views').prefetch_related('tags').select_related(
+                'category'),
         }
 
-        return self.get_paginated_response(response_data)
+        top_filter = self.request.query_params.get('filter', None)
 
-# class FilterTopListView(generics.ListAPIView):
+        return top_filters.get(top_filter, Post.objects.none())
+
+       
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            tags = Tag.objects.all()
+            categories = Category.objects.all()
+            
+            if not queryset.exists():
+                response_data = {
+                    'message': 'Hozircha maqolalar mavjud emas!',
+                    'page_count': 0,
+                    'current_page': 1
+                }
+                return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+
+            paginated_queryset = self.paginate_queryset(queryset)
+            serializer = self.get_serializer(paginated_queryset, many=True)
+
+            response_data = {
+                'tags': TagSerializer(tags, many=True).data,
+                'categories': CategorySerializer(categories, many=True).data,
+                'posts': serializer.data,
+                'page_count': self.paginator.page.paginator.num_pages,
+                'current_page': self.paginator.page.number,
+                'next': self.paginator.get_next_link(),
+                'previous': self.paginator.get_previous_link(),
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(f"Error in list: {e}")
+            return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

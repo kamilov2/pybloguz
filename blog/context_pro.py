@@ -2,7 +2,7 @@ from blog.models import Category, Tag, InstagramPost, Ad, Post
 
 
 def get_all(request):
-    if request.path == "/" or  "tag" in request.path or "filter"  in request.path:
+    if request.path == "/" or "category" in request.path or "tag" in request.path or "filter" in request.path or "post" in request.path:
         context = {
             'categories':Category.objects.all(),
             'tags':Tag.objects.all(),
