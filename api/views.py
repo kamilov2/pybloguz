@@ -13,6 +13,52 @@ from blog.models import Post, Category, Tag
 from .serializers import HomePageSerializer, PostDetailSerializer, TagSerializer, CategorySerializer
 
 
+
+class CategoryListView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        return Category.objects.all()
+
+    def get_serializer_context(self):
+        return {'category': self.request}
+    
+class TagListView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = TagSerializer
+
+    def get_queryset(self):
+        return Tag.objects.all()
+
+    def get_serializer_context(self):
+        return {'tag': self.request}
+
+
+class FirstCategoryListView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        return Category.objects.all()[:5]
+
+    def get_serializer_context(self):
+        return {'category': self.request}
+    
+class LastCategoryListView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        return Category.objects.all()[5:]
+
+    def get_serializer_context(self):
+        return {'category': self.request}
+    
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 5
     page_size_query_param = 'page_size'
@@ -29,31 +75,27 @@ class HomePageAPIView(generics.ListAPIView):
         return Post.objects.filter(is_published=True, is_top=True).order_by('-id').prefetch_related(
             'tags', 'comments').select_related('category', 'author')
 
-
-    def list(self, request, *args, **kwargs):
-        page = self.request.query_params.get('page', 1) 
+    def list(self, request):
+        page = self.request.query_params.get('page', 1)
         queryset = self.get_queryset()
         tags = Tag.objects.all()
         categories = Category.objects.all()
 
-        serializer = self.get_serializer(queryset, many=True)
-        
-        
+        serializer = self.serializer_class(queryset, many=True, context={'request': request})
 
         paginated_data = self.paginate_queryset(serializer.data)
-        
+
         paginator = Paginator(queryset, self.paginator.page_size)
         total_pages = paginator.num_pages
 
-        response_data = {
-            'tags': TagSerializer(tags, many=True),
-            'categories': CategorySerializer(categories, many=True),
+        response_data = {         
             'posts': paginated_data,
-            'current_page': int(page),           
-            'total_pages': total_pages  
+            'current_page': int(page),
+            'total_pages': total_pages
         }
 
-        return self.get_paginated_response(response_data, status=status.HTTP_200_OK)
+        return self.get_paginated_response(response_data)
+
 
 class PostDetailAPIView(APIView):
     permission_classes = [AllowAny]
@@ -131,10 +173,12 @@ class FilterListView(generics.ListAPIView):
             categories = Category.objects.all()
 
             if queryset is not None and len(queryset) > 0:
-                serializer = self.get_serializer(queryset, many=True)
+                serializer = self.get_serializer(queryset, many=True, context={'request': request})
 
                 paginated_data = self.paginator.paginate_queryset(serializer.data, self.request)
                 response_data = {
+                    'next_page': self.paginator.get_next_link(),
+                    'previous_page': self.paginator.get_previous_link(),
                     'tags': TagSerializer(tags, many=True).data,
                     'categories': CategorySerializer(categories, many=True).data,
                     'posts': paginated_data,
@@ -142,11 +186,9 @@ class FilterListView(generics.ListAPIView):
                     'post_count': post_count,
                     'page_count': self.paginator.page.paginator.num_pages,
                     'current_page': self.paginator.page.number,
-                    'next_page': self.paginator.get_next_link(),
-                    'previous_page': self.paginator.get_previous_link()
                 }
 
-                return Response(response_data, status=status.HTTP_200_OK)
+                return Response(response_data)
             else:
                 response_data = {
                     'message': 'Hozircha maqolalar mavjud emas!',
@@ -194,7 +236,7 @@ class FilterTopListView(generics.ListAPIView):
         return top_filters.get(top_filter, Post.objects.none())
 
        
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         try:
             queryset = self.get_queryset()
             tags = Tag.objects.all()
@@ -209,16 +251,16 @@ class FilterTopListView(generics.ListAPIView):
                 return Response(response_data, status=status.HTTP_404_NOT_FOUND)
 
             paginated_queryset = self.paginate_queryset(queryset)
-            serializer = self.get_serializer(paginated_queryset, many=True)
+            serializer = self.get_serializer(paginated_queryset, many=True, context={'request': request})
 
             response_data = {
+                'next': self.paginator.get_next_link(),
+                'previous': self.paginator.get_previous_link(),
                 'tags': TagSerializer(tags, many=True).data,
                 'categories': CategorySerializer(categories, many=True).data,
                 'posts': serializer.data,
                 'page_count': self.paginator.page.paginator.num_pages,
                 'current_page': self.paginator.page.number,
-                'next': self.paginator.get_next_link(),
-                'previous': self.paginator.get_previous_link(),
             }
             return Response(response_data, status=status.HTTP_200_OK)
         except Exception as e:

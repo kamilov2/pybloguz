@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "django_quill",
+    'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
     "debug_toolbar",
@@ -63,6 +64,7 @@ INSTALLED_APPS = [
 PRIVATE_MEDIA_SERVER = 'api.views.custom_serve_media'
 
 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -72,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     # 'silk.middleware.SilkyMiddleware',
 ]
 
@@ -90,6 +93,11 @@ REST_FRAMEWORK = {
 }
 
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  
+    "http://127.0.0.1:8000",   
+    'https://pyblog.vercel.app'
+]
 
 ROOT_URLCONF = 'config.urls'
 HOST = "https://pyblog.uz"
@@ -148,7 +156,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 #SIMPLE JWT
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=14),
     'SLIDING_TOKEN_LIFETIME': timedelta(days=14),
