@@ -18,15 +18,31 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf.urls.static import static
 from django.conf import settings
-
 from api.urls import urlpatterns as api_url
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Your API Title",
+      default_version='v1',
+      description="Your API description",
+      terms_of_service="https://www.example.com/policies/terms/",
+      contact=openapi.Contact(email="contact@example.com"),
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
 urlpatterns = [
     path('master/', admin.site.urls),    
     path('', include("blog.urls", namespace='blog')),
     path('api/' , include(api_url)),    
     path('__debug__/', include('debug_toolbar.urls')),
-    path('silk/', include('silk.urls', namespace='silk'))
+    path('silk/', include('silk.urls', namespace='silk')),
+    path('api/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+   path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
   
 ]

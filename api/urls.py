@@ -4,7 +4,7 @@ from .views import (
     HomePageAPIView, PostDetailAPIView,
     FilterListView, FilterTopListView,
     CategoryListView, TagListView,
-    FirstCategoryListView, LastCategoryListView
+    FirstCategoryListView, LastCategoryListView,    
     )
 
 urlpatterns = [
@@ -18,6 +18,7 @@ urlpatterns = [
     re_path(r'^filter_top/$', FilterTopListView.as_view(), name='filter_top'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+  
 
 
 ]

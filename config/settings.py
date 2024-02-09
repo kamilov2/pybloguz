@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     "debug_toolbar",
+    'drf_spectacular',
+    'drf_yasg',
     'silk',
     "blog",
     'api'
@@ -63,6 +65,43 @@ INSTALLED_APPS = [
 
 PRIVATE_MEDIA_SERVER = 'api.views.custom_serve_media'
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'My Awesome API',
+    'DESCRIPTION': 'This API provides endpoints for interacting with our service.',
+    'VERSION': '1.0.0',
+    'SCHEMA_PATH_PREFIX': r'/api/v1',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PUBLIC': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'COMPONENT_SPLIT_RESPONSE': True,
+    'COMPONENT_SPLIT_PAGINATION': True,
+    'COMPONENT_SPLIT_PARAMETERS': True,
+    'COMPONENT_SPLIT_SECURITY': True,
+    'VALIDATE_REQUEST_BODY': True,
+    'VALIDATE_RESPONSE_BODY': True,
+    'DEFAULT_GENERATOR_CLASS': 'drf_spectacular.generators.SchemaGenerator',
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_FIELD_INSPECTORS': [
+        'drf_spectacular.inspectors.CamelCaseJSONFilter',
+        'drf_spectacular.inspectors.ExcludeSerializerDefault',
+        'drf_spectacular.inspectors.SortedParameterInspector',
+        'drf_spectacular.inspectors.RecursiveFieldInspector',
+    ],
+    'DEFAULT_FILTER_INSPECTORS': [
+        'drf_spectacular.inspectors.DjangoFilterInspector',
+        'drf_spectacular.inspectors.CoreAPICompatInspector',
+    ],
+    'DEFAULT_PATH_PARAM_INSPECTORS': [
+        'drf_spectacular.inspectors.CamelCaseJSONFilter',
+    ],
+    'DEFAULT_REQUEST_TRANSFORMERS': [
+        'drf_spectacular.plumbing.OptionalPaginationTransformer',
+    ],
+    'DEFAULT_RESPONSE_TRANSFORMERS': [
+        'drf_spectacular.plumbing.OptionalPaginationTransformer',
+    ],
+
+}
 
 
 MIDDLEWARE = [
@@ -90,14 +129,33 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
 
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
 }
 
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  
     "http://127.0.0.1:8000",   
-    'https://pyblog.vercel.app'
+    'https://pyblog.vercel.app',
+    "http://localhost:5000",   
+
 ]
+
+# settings.py
+
+CSP_HEADER = {
+    'default-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*"],
+    'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*"],
+    'style-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*"],
+    'img-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*"],
+    'font-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*"],
+    'frame-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*"],
+    'object-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*"],
+}
+
+X_FRAME_OPTIONS = 'ALLOWALL'
+
 
 ROOT_URLCONF = 'config.urls'
 HOST = "https://pyblog.uz"

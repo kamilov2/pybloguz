@@ -11,6 +11,8 @@ from django.db.models import Max
 from django.core.paginator import Paginator
 from blog.models import Post, Category, Tag
 from .serializers import HomePageSerializer, PostDetailSerializer, TagSerializer, CategorySerializer
+from drf_yasg.utils import swagger_auto_schema
+
 
 
 
@@ -65,17 +67,48 @@ class CustomPageNumberPagination(PageNumberPagination):
     max_page_size = 1000
 
 
+
 class HomePageAPIView(generics.ListAPIView):
+    """
+    Домашняя страница API предоставляет список публикаций на главной странице.
+    
+    **Permissions:**
+    - `AllowAny`: Доступ к данному эндпоинту разрешен для всех.
+
+    **Authentication:**
+    - `JWTAuthentication`: Требуется JWT-аутентификация для доступа к этому эндпоинту.
+
+    **Query Params:**
+    - `page` (optional, int): Номер страницы для пагинации.
+
+    **Responses:**
+    - `200 OK`: Успешный ответ. Возвращает список публикаций на главной странице.
+    """
     permission_classes = [AllowAny]
     authentication_classes = [JWTAuthentication]
     serializer_class = HomePageSerializer
     pagination_class = CustomPageNumberPagination
-
+    
+    @swagger_auto_schema(
+        operation_summary="Сводка эндпоинта",
+        operation_description="Подробное описание того, что делает этот эндпоинт",
+        responses={200: "Успешный ответ"},
+    )
     def get_queryset(self):
+        """
+        Возвращает список опубликованных и лучших публикаций, отсортированных по убыванию идентификатора.
+        """
         return Post.objects.filter(is_published=True, is_top=True).order_by('-id').prefetch_related(
             'tags', 'comments').select_related('category', 'author')
 
     def list(self, request):
+        """
+        Список опубликованных и лучших публикаций на главной странице.
+
+        Принимает параметр 'page' для пагинации результатов.
+
+        Возвращает список публикаций на главной странице, пагинированный в соответствии с параметром 'page'.
+        """
         page = self.request.query_params.get('page', 1)
         queryset = self.get_queryset()
         tags = Tag.objects.all()
@@ -95,7 +128,6 @@ class HomePageAPIView(generics.ListAPIView):
         }
 
         return self.get_paginated_response(response_data)
-
 
 class PostDetailAPIView(APIView):
     permission_classes = [AllowAny]
@@ -266,3 +298,4 @@ class FilterTopListView(generics.ListAPIView):
         except Exception as e:
             print(f"Error in list: {e}")
             return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

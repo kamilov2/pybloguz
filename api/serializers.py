@@ -2,6 +2,8 @@ from rest_framework import serializers
 from blog.models import Post, Tag, Category
 from django.contrib.auth.models import User 
 
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
