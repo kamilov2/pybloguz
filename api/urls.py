@@ -1,10 +1,12 @@
 from django.urls import re_path, path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 from .views import (
     HomePageAPIView, PostDetailAPIView,
     FilterListView, FilterTopListView,
     CategoryListView, TagListView,
     FirstCategoryListView, LastCategoryListView,    
+    site_uml
     )
 
 urlpatterns = [
@@ -18,7 +20,7 @@ urlpatterns = [
     re_path(r'^filter_top/$', FilterTopListView.as_view(), name='filter_top'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-  
+    path('site_uml/', site_uml, name='site_uml'),
 
 
 ]

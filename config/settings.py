@@ -66,7 +66,7 @@ INSTALLED_APPS = [
 PRIVATE_MEDIA_SERVER = 'api.views.custom_serve_media'
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'My Awesome API',
+    'TITLE': 'Pyblog API Documentation',
     'DESCRIPTION': 'This API provides endpoints for interacting with our service.',
     'VERSION': '1.0.0',
     'SCHEMA_PATH_PREFIX': r'/api/v1',
@@ -114,7 +114,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    # 'silk.middleware.SilkyMiddleware',
+    'api.middleware.HSTSMiddleware'
 ]
 
 
@@ -130,6 +130,11 @@ REST_FRAMEWORK = {
 
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 2,
 
 }
 
@@ -142,7 +147,6 @@ CORS_ALLOWED_ORIGINS = [
 
 ]
 
-# settings.py
 
 CSP_HEADER = {
     'default-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*"],
@@ -155,6 +159,8 @@ CSP_HEADER = {
 }
 
 X_FRAME_OPTIONS = 'ALLOWALL'
+
+
 
 
 ROOT_URLCONF = 'config.urls'
@@ -171,7 +177,6 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'blog.context_pro.get_all',
-                # 'blog.context_pro.set_all_rect_count
             ],
         },
     },
@@ -261,12 +266,6 @@ LOGGING = {
         },
     },
 }
-
-#TELEGRAM BOT FOR ERROR
-# TELEGRAM_BOT_TOKEN = '6924766606:AAG3VuXYr5zYYOihItm-9RrKs_oajRkH9rQ'
-# ERROR_GROUP_CHAT_ID = '-1002049187972'
-# LOG_GROUP_CHAT_ID = '-1002141010855'
-# BUG_GROUP_CHAT_ID = '-1001944942988'
 
 
 # Internationalization

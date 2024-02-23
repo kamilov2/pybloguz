@@ -9,6 +9,8 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import Max
 from django.core.paginator import Paginator
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponseRedirect
 from blog.models import Post, Category, Tag
 from .serializers import HomePageSerializer, PostDetailSerializer, TagSerializer, CategorySerializer
 from drf_yasg.utils import swagger_auto_schema
@@ -61,10 +63,6 @@ class LastCategoryListView(generics.ListAPIView):
     def get_serializer_context(self):
         return {'category': self.request}
     
-class CustomPageNumberPagination(PageNumberPagination):
-    page_size = 5
-    page_size_query_param = 'page_size'
-    max_page_size = 1000
 
 
 
@@ -73,7 +71,7 @@ class HomePageAPIView(generics.ListAPIView):
     Домашняя страница API предоставляет список публикаций на главной странице.
     
     **Permissions:**
-    - `AllowAny`: Доступ к данному эндпоинту разрешен для всех.
+    - `IsAuthenticated`: Доступ к данному эндпоинту разрешен для всех.
 
     **Authentication:**
     - `JWTAuthentication`: Требуется JWT-аутентификация для доступа к этому эндпоинту.
@@ -87,7 +85,6 @@ class HomePageAPIView(generics.ListAPIView):
     permission_classes = [AllowAny]
     authentication_classes = [JWTAuthentication]
     serializer_class = HomePageSerializer
-    pagination_class = CustomPageNumberPagination
     
     @swagger_auto_schema(
         operation_summary="Сводка эндпоинта",
@@ -111,8 +108,7 @@ class HomePageAPIView(generics.ListAPIView):
         """
         page = self.request.query_params.get('page', 1)
         queryset = self.get_queryset()
-        tags = Tag.objects.all()
-        categories = Category.objects.all()
+     
 
         serializer = self.serializer_class(queryset, many=True, context={'request': request})
 
@@ -176,7 +172,6 @@ class FilterListView(generics.ListAPIView):
     permission_classes = [AllowAny]
     authentication_classes = [JWTAuthentication]
     serializer_class = HomePageSerializer
-    pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
         category_id, tag_id = (
@@ -211,8 +206,8 @@ class FilterListView(generics.ListAPIView):
                 response_data = {
                     'next_page': self.paginator.get_next_link(),
                     'previous_page': self.paginator.get_previous_link(),
-                    'tags': TagSerializer(tags, many=True).data,
-                    'categories': CategorySerializer(categories, many=True).data,
+                    # 'tags': TagSerializer(tags, many=True).data,
+                    # 'categories': CategorySerializer(categories, many=True).data,
                     'posts': paginated_data,
                     'title': title,
                     'post_count': post_count,
@@ -220,6 +215,7 @@ class FilterListView(generics.ListAPIView):
                     'current_page': self.paginator.page.number,
                 }
 
+       
                 return Response(response_data)
             else:
                 response_data = {
@@ -240,9 +236,9 @@ class FilterTopListView(generics.ListAPIView):
     permission_classes = [AllowAny]
     authentication_classes = [JWTAuthentication]
     serializer_class = HomePageSerializer
-    pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
+
         this_week = datetime.datetime.utcnow().isocalendar()[1]
         this_month = datetime.datetime.utcnow().month
 
@@ -299,3 +295,11 @@ class FilterTopListView(generics.ListAPIView):
             print(f"Error in list: {e}")
             return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+
+
+@staff_member_required
+def site_uml(request):
+    figma_url = "https://www.figma.com/file/k2aH8QNpHu4iQ4jfcV3zoq/Pyblog?type=whiteboard&node-id=0%3A1&t=71s6njWXZHExk7t7-1"
+    return HttpResponseRedirect(figma_url)
